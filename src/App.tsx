@@ -1,29 +1,46 @@
-import { useState, useEffect } from 'react';
-
+import { useState, useEffect, useCallback, ChangeEvent } from 'react';
+import { getData } from './utils/data';
+import { URL_API } from './utils/constants';
 import CardList from './components/card-list/card-list.component';
 import SearchBox from './components/search-box/search-box.component';
+import { Users } from './utils/types'
 import './App.css';
+import React from 'react';
 
 const App = () => {
+
+
   const [searchField, setSearchField] = useState('');
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Users[]>([]);
   const [filteredMonsters, setFilterMonsters] = useState(monsters);
 
-  useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((users) => setMonsters(users));
-  }, []);
+  /* 
+  * Fazer o fetch dos usuarios usando a função auxiliadora de tipagem
+  */
+  const fetchUsers = useCallback(async () => {
+    const users = await getData<Users[]>(URL_API);
+    setMonsters(users);
+  }, [setMonsters])
 
-  useEffect(() => {
+  /*
+  * Fazer a filtragem dos usuários através do campo de texto
+  */
+  const filterUsers = useCallback((): void => {
     const newFilteredMonsters = monsters.filter((monster) => {
       return monster.name.toLocaleLowerCase().includes(searchField);
     });
-
     setFilterMonsters(newFilteredMonsters);
-  }, [monsters, searchField]);
+  }, [setFilterMonsters, monsters, searchField])
 
-  const onSearchChange = (event) => {
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    filterUsers()
+  }, [filterUsers]);
+
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLocaleLowerCase();
     setSearchField(searchFieldString);
   };

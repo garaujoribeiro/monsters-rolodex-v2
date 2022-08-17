@@ -1,6 +1,9 @@
+import React from 'react';
 import './card.styles.css';
-
-const Card = ({ monster }) => {
+import { Users } from '../../utils/types';
+const Card = ({ monster }: {
+  monster: Users
+}) => {
   const { id, name, email } = monster;
 
   return (
